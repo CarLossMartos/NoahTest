@@ -1,0 +1,59 @@
+version: "3"
+
+services:
+  php-apache:
+    container_name: "${CONTAINER_NAME_PREFIX}-apache-php"
+    build: ./docker/php-apache
+    volumes:
+      - ${PATH_TO_SYMFONY_PROJECT}:/var/www/html
+    ports:
+      - "80:80"
+    networks:
+      - symfony_network
+
+  db:
+    container_name: "${CONTAINER_NAME_PREFIX}-mariadb"
+    image: mariadb:latest
+    environment:
+      - MARIADB_ROOT_USER=root
+      - MARIADB_ROOT_PASSWORD=root
+      - MARIADB_USER=symfony
+      - MARIADB_PASSWORD=symfony_pass
+      - MARIADB_DATABASE=symfony_db
+    volumes:
+      - db:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - symfony_network
+
+  mailer:
+    container_name: "${CONTAINER_NAME_PREFIX}-mailer"
+    image: schickling/mailcatcher
+    ports:
+      - "1025:1025"
+      - "1080:1080"
+    networks:
+      - symfony_network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: symfony_phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: root
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    networks:
+      - symfony_network
+
+volumes:
+  db:
+
+networks:
+  symfony_network:
+    driver: bridge
