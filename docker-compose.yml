@@ -38,7 +38,7 @@ services:
     container_name: symfony_phpmyadmin
     restart: always
     environment:
-      PMA_HOST: db
+      PMA_HOST: "${CONTAINER_NAME_PREFIX}-mariadb"
     ports:
       - "8080:80"
     depends_on:
