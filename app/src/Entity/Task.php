@@ -33,6 +33,10 @@ class Task
     #[ORM\OneToMany(targetEntity: User::class, mappedBy: 'task')]
     private Collection $userId;
 
+    #[ORM\OneToOne(inversedBy: 'task', cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Projekt $projektId = null;
+
     public function __construct()
     {
         $this->userId = new ArrayCollection();
@@ -124,6 +128,18 @@ class Task
                 $userId->setTask(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getProjektId(): ?Projekt
+    {
+        return $this->projektId;
+    }
+
+    public function setProjektId(Projekt $projektId): static
+    {
+        $this->projektId = $projektId;
 
         return $this;
     }

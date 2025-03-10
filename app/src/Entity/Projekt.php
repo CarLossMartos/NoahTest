@@ -33,6 +33,9 @@ class Projekt
     #[ORM\ManyToMany(targetEntity: self::class, inversedBy: 'userId')]
     private Collection $userId;
 
+    #[ORM\OneToOne(mappedBy: 'projektId', cascade: ['persist', 'remove'])]
+    private ?Task $task = null;
+
     public function __construct()
     {
         $this->tasks = new ArrayCollection();
@@ -118,6 +121,23 @@ class Projekt
     public function removeUserId(self $userId): static
     {
         $this->userId->removeElement($userId);
+
+        return $this;
+    }
+
+    public function getTask(): ?Task
+    {
+        return $this->task;
+    }
+
+    public function setTask(Task $task): static
+    {
+        // set the owning side of the relation if necessary
+        if ($task->getProjektId() !== $this) {
+            $task->setProjektId($this);
+        }
+
+        $this->task = $task;
 
         return $this;
     }
