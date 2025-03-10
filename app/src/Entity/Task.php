@@ -116,7 +116,7 @@ class Task
         return $this;
     }
 
-    public function removeUserId(User $userId): static
+    public function removeByUserId(User $userId): static
     {
         if ($this->userId->removeElement($userId)) {
             // set the owning side to null (unless already changed)
