@@ -22,7 +22,7 @@ class Task
     private ?string $taskDescription = null;
 
     #[ORM\Column]
-    private ?int $status = null;
+    private ?string $status = null;
 
     #[ORM\ManyToOne(inversedBy: 'tasks')]
     private ?Projekt $projekt = null;

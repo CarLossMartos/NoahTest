@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Projekt;
+use App\Repository\ProjektRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -12,13 +13,33 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class ProjektController extends AbstractController
 {
-    #[Route('/projekt', name: 'app_projekt')]
+    #[Route('/api', name: 'api_')]
     public function index(): Response
     {
         return $this->render('projekt/index.html.twig', [
             'controller_name' => 'ProjektController',
         ]);
     }
+
+    #[Route('/projects', name: 'get_all_projects', methods: ['GET'])]
+    public function getAllProjects(ProjektRepository $projektRepository): JsonResponse
+    {
+        $projects = $projektRepository->findAll();
+
+        $data = [];
+        foreach ($projects as $project) {
+            $data[] = [
+                'id' => $project->getId(),
+                'name' => $project->getName(),
+                'color' => $project->getColor(),
+                'created_at' => $project->getCreatedAt()->format('c'),
+                'updated_at' => $project->getUpdatedAt()->format('c'),
+            ];
+        }
+
+        return $this->json(['projects' => $data]);
+    }
+
 
     #[Route('/projekt/create', name: 'create_projekt', methods: ['POST'])]
     public function create(Request $request, EntityManagerInterface $entityManager): JsonResponse
