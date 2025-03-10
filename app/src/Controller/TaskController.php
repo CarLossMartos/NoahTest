@@ -2,131 +2,89 @@
 
 namespace App\Controller;
 
-use App\Entity\Task;
-use App\Entity\Projekt;
-use App\Entity\User;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\TaskService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Annotation\Route;
 
-final class TaskController extends AbstractController
+#[Route('/api', name: 'api_')]
+class TaskController extends AbstractController
 {
-    #[Route('/task/create', name: 'create_task', methods: ['POST'])]
-    public function create(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    public function __construct(private TaskService $taskService) {}
+
+    #[Route('/tasks/{id}', name: 'get_task_by_id', methods: ['GET'])]
+    public function getTaskById(int $id): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-
-        if (!isset($data['taskName'], $data['projektId'])) {
-            return $this->json(['error' => 'Task name and project ID are required'], 400);
-        }
-
-        $projekt = $entityManager->getRepository(Projekt::class)->find($data['projektId']);
-
-        if (!$projekt) {
-            return $this->json(['error' => 'Project not found'], 404);
-        }
-
-        $task = new Task();
-        $task->setTaskName($data['taskName']);
-        $task->setTaskDescription($data['taskDescription'] ?? null);
-        $task->setStatus($data['status'] ?? 0);
-        $task->setProjekt($projekt);
-
-        $entityManager->persist($task);
-        $entityManager->flush();
-
-        return $this->json([
-            'message' => 'Task created successfully',
-            'task' => [
-                'id' => $task->getId(),
-                'taskName' => $task->getTaskName(),
-                'taskDescription' => $task->getTaskDescription(),
-                'status' => $task->getStatus(),
-                'projectId' => $projekt->getId(),
-            ],
-        ], 201);
-    }
-
-    #[Route('/task/project/{projektId}', name: 'get_tasks_by_project', methods: ['GET'])]
-    public function getTasksByProject(int $projektId, EntityManagerInterface $entityManager): JsonResponse
-    {
-        $projekt = $entityManager->getRepository(Projekt::class)->find($projektId);
-
-        if (!$projekt) {
-            return $this->json(['error' => 'Project not found'], 404);
-        }
-
-        $tasks = $projekt->getTasks();
-        $taskData = [];
-
-        foreach ($tasks as $task) {
-            $taskData[] = [
-                'id' => $task->getId(),
-                'taskName' => $task->getTaskName(),
-                'taskDescription' => $task->getTaskDescription(),
-                'status' => $task->getStatus(),
-            ];
-        }
-
-        return $this->json($taskData);
-    }
-
-    #[Route('/task', name: 'get_all_tasks', methods: ['GET'])]
-    public function getAllTasks(EntityManagerInterface $entityManager): JsonResponse
-    {
-        $tasks = $entityManager->getRepository(Task::class)->findAll();
-        $taskData = [];
-
-        foreach ($tasks as $task) {
-            $taskData[] = [
-                'id' => $task->getId(),
-                'taskName' => $task->getTaskName(),
-                'taskDescription' => $task->getTaskDescription(),
-                'status' => $task->getStatus(),
-            ];
-        }
-
-        return $this->json($taskData);
-    }
-
-    #[Route('/task/user/{userId}', name: 'get_tasks_by_user', methods: ['GET'])]
-    public function getTasksByUser(int $userId, EntityManagerInterface $entityManager): JsonResponse
-    {
-        $user = $entityManager->getRepository(User::class)->find($userId);
-
-        if (!$user) {
-            return $this->json(['error' => 'User not found'], 404);
-        }
-
-        $tasks = $user->getTasks();
-        $taskData = [];
-
-        foreach ($tasks as $task) {
-            $taskData[] = [
-                'id' => $task->getId(),
-                'taskName' => $task->getTaskName(),
-                'taskDescription' => $task->getTaskDescription(),
-                'status' => $task->getStatus(),
-            ];
-        }
-
-        return $this->json($taskData);
-    }
-
-    #[Route('/task/delete/{id}', name: 'delete_task', methods: ['DELETE'])]
-    public function delete(int $id, EntityManagerInterface $entityManager): JsonResponse
-    {
-        $task = $entityManager->getRepository(Task::class)->find($id);
+        $task = $this->taskService->getTaskById($id);
 
         if (!$task) {
             return $this->json(['error' => 'Task not found'], 404);
         }
 
-        $entityManager->remove($task);
-        $entityManager->flush();
+        return $this->json($task);
+    }
 
-        return $this->json(['message' => 'Task deleted successfully'], 200);
+    #[Route('/tasks', name: 'create_task', methods: ['POST'])]
+    public function createTask(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        if (!isset($data['title'], $data['description'], $data['status'], $data['project_id'])) {
+            return $this->json(['error' => 'All fields (title, description, status, project_id) are required'], 400);
+        }
+
+        $task = $this->taskService->createTask(
+            $data['title'],
+            $data['description'],
+            $data['status'],
+            $data['project_id']
+        );
+
+        if (!$task) {
+            return $this->json(['error' => 'Project not found'], 404);
+        }
+
+        return $this->json([
+            'id' => $task->getId(),
+            'title' => $task->getTaskName(),
+            'description' => $task->getTaskDescription(),
+            'status' => $task->getStatus(),
+            'project_id' => $task->getProjekt()->getId(),
+            'project_name' => $task->getProjekt()->getName(),
+            'project_color' => $task->getProjekt()->getColor(),
+            'created_at' => $task->getCreatedAt()->format('c'),
+            'updated_at' => $task->getUpdatedAt()->format('c'),
+        ], 201);
+    }
+
+    #[Route('/tasks/{id}', name: 'update_task', methods: ['PUT'])]
+    public function updateTask(int $id, Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $task = $this->taskService->updateTask(
+            $id,
+            $data['title'] ?? null,
+            $data['description'] ?? null,
+            $data['status'] ?? null,
+            $data['project_id'] ?? null
+        );
+
+        if (!$task) {
+            return $this->json(['error' => 'Task not found'], 404);
+        }
+
+        return $this->json([
+            'id' => $task->getId(),
+            'title' => $task->getTaskName(),
+            'description' => $task->getTaskDescription(),
+            'status' => $task->getStatus(),
+            'project_id' => $task->getProjekt()->getId(),
+            'project_name' => $task->getProjekt()->getName(),
+            'project_color' => $task->getProjekt()->getColor(),
+            'created_at' => $task->getCreatedAt()->format('c'),
+            'updated_at' => $task->getUpdatedAt()->format('c'),
+        ]);
     }
 }

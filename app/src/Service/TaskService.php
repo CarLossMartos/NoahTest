@@ -4,21 +4,61 @@ namespace App\Service;
 
 use App\Entity\Task;
 use App\Repository\TaskRepository;
+use App\Repository\ProjektRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
 class TaskService
 {
     public function __construct(
         private TaskRepository $taskRepository,
+        private ProjektRepository $projektRepository,
         private EntityManagerInterface $entityManager
     ) {}
 
-    public function createTask(string $taskName, ?string $taskDescription, int $status, int $projektId): Task
+    /**
+     * Task nach ID abrufen
+     */
+    public function getTaskById(int $id): ?array
     {
+        $task = $this->taskRepository->find($id);
+
+        if (!$task) {
+            return null;
+        }
+
+        $project = $task->getProjekt();
+
+        return [
+            'id' => $task->getId(),
+            'title' => $task->getTaskName(),
+            'description' => $task->getTaskDescription(),
+            'status' => $task->getStatus(),
+            'project_id' => $project ? $project->getId() : null,
+            'project_name' => $project ? $project->getName() : null,
+            'project_color' => $project ? $project->getColor() : null,
+            'created_at' => $task->getCreatedAt()->format('c'),
+            'updated_at' => $task->getUpdatedAt()->format('c'),
+        ];
+    }
+
+    /**
+     * Neuen Task erstellen
+     */
+    public function createTask(string $title, string $description, string $status, int $projectId): ?Task
+    {
+        $project = $this->projektRepository->find($projectId);
+
+        if (!$project) {
+            return null;
+        }
+
         $task = new Task();
-        $task->setTaskName($taskName);
-        $task->setTaskDescription($taskDescription);
+        $task->setTaskName($title);
+        $task->setTaskDescription($description);
         $task->setStatus($status);
+        $task->setProjekt($project);
+        $task->setCreatedAt(new \DateTime());
+        $task->setUpdatedAt(new \DateTime());
 
         $this->entityManager->persist($task);
         $this->entityManager->flush();
@@ -26,23 +66,40 @@ class TaskService
         return $task;
     }
 
-    public function deleteTask(int $id): void
+    /**
+     * Task aktualisieren
+     */
+    public function updateTask(int $id, ?string $title, ?string $description, ?string $status, ?int $projectId): ?Task
     {
         $task = $this->taskRepository->find($id);
 
-        if ($task) {
-            $this->entityManager->remove($task);
-            $this->entityManager->flush();
+        if (!$task) {
+            return null;
         }
-    }
 
-    public function getTasksByProjektId(int $projektId): array
-    {
-        return $this->taskRepository->findByProjektId($projektId);
-    }
+        if ($projectId !== null) {
+            $project = $this->projektRepository->find($projectId);
+            if ($project) {
+                $task->setProjekt($project);
+            }
+        }
 
-    public function getTasksByUserId(int $userId): array
-    {
-        return $this->taskRepository->findByUserId($userId);
+        if ($title) {
+            $task->setTaskName($title);
+        }
+
+        if ($description) {
+            $task->setTaskDescription($description);
+        }
+
+        if ($status) {
+            $task->setStatus($status);
+        }
+
+        $task->setUpdatedAt(new \DateTime());
+
+        $this->entityManager->flush();
+
+        return $task;
     }
 }
