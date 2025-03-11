@@ -26,6 +26,7 @@ class Task
     private ?string $status = null;
 
     #[ORM\ManyToOne(inversedBy: 'tasks')]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Projekt $projekt = null;
 
     /**
@@ -33,10 +34,6 @@ class Task
      */
     #[ORM\OneToMany(targetEntity: User::class, mappedBy: 'task')]
     private Collection $userId;
-
-    #[ORM\OneToOne(inversedBy: 'task', cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: true)]
-    private ?Projekt $projektId = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $created_at = null;
