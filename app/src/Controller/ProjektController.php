@@ -43,7 +43,15 @@ class ProjektController extends AbstractController
             return $this->json(['error' => 'Project not found'], 404);
         }
 
-        return $this->json($project);
+        $data = [
+            'id'         => $project->getId(),
+            'name'       => $project->getName(),
+            'color'      => $project->getColor(),
+            'created_at' => $project->getCreatedAt()->format('c'),
+            'updated_at' => $project->getUpdatedAt()->format('c'),
+        ];
+
+        return $this->json($data);
     }
 
     #[Route('/projects', name: 'create_project', methods: ['POST'])]
@@ -58,9 +66,9 @@ class ProjektController extends AbstractController
         $project = $this->projektService->createProject($data['name'], $data['color']);
 
         return $this->json([
-            'id' => $project->getId(),
-            'name' => $project->getName(),
-            'color' => $project->getColor(),
+            'id'         => $project->getId(),
+            'name'       => $project->getName(),
+            'color'      => $project->getColor(),
             'created_at' => $project->getCreatedAt()->format('c'),
             'updated_at' => $project->getUpdatedAt()->format('c'),
         ], 201);
@@ -82,9 +90,9 @@ class ProjektController extends AbstractController
         }
 
         return $this->json([
-            'id' => $project->getId(),
-            'name' => $project->getName(),
-            'color' => $project->getColor(),
+            'id'         => $project->getId(),
+            'name'       => $project->getName(),
+            'color'      => $project->getColor(),
             'created_at' => $project->getCreatedAt()->format('c'),
             'updated_at' => $project->getUpdatedAt()->format('c'),
         ]);
