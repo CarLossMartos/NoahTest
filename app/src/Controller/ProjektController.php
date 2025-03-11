@@ -16,7 +16,22 @@ class ProjektController extends AbstractController
     #[Route('/projects', name: 'get_all_projects', methods: ['GET'])]
     public function getAllProjects(): JsonResponse
     {
-        return $this->json(['projects' => $this->projektService->getAllProjects()]);
+        $projects = $this->projektService->getAllProjects();
+
+        $data = [];
+        foreach ($projects as $project) {
+            $data[] = [
+                'id'         => $project->getId(),
+                'name'       => $project->getName(),
+                'color'      => $project->getColor(),
+                'created_at' => $project->getCreatedAt()->format('c'),
+                'updated_at' => $project->getUpdatedAt()->format('c'),
+            ];
+        }
+
+        return $this->json([
+            'projects' => $data
+        ]);
     }
 
     #[Route('/projects/{id}', name: 'get_project_by_id', methods: ['GET'])]
