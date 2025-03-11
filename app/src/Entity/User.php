@@ -4,9 +4,11 @@ namespace App\Entity;
 
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-class User
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -16,7 +18,7 @@ class User
     #[ORM\Column(length: 255)]
     private ?string $username = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(length: 255)]
     private ?string $password = null;
 
     #[ORM\ManyToOne(inversedBy: 'userId')]
@@ -24,6 +26,8 @@ class User
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $email = null;
+
+    // Getter und Setter
 
     public function getId(): ?int
     {
@@ -33,7 +37,6 @@ class User
     public function setId(int $id): static
     {
         $this->id = $id;
-
         return $this;
     }
 
@@ -45,7 +48,6 @@ class User
     public function setUsername(string $username): static
     {
         $this->username = $username;
-
         return $this;
     }
 
@@ -57,7 +59,6 @@ class User
     public function setPassword(?string $password): static
     {
         $this->password = $password;
-
         return $this;
     }
 
@@ -69,7 +70,6 @@ class User
     public function setTask(?Task $task): static
     {
         $this->task = $task;
-
         return $this;
     }
 
@@ -81,7 +81,31 @@ class User
     public function setEmail(?string $email): static
     {
         $this->email = $email;
-
         return $this;
+    }
+
+
+    /**
+     * Liefert den eindeutigen Identifikator des Nutzers.
+     * In modernen Symfony-Versionen ersetzt diese Methode getUsername().
+     */
+    public function getUserIdentifier(): string
+    {
+        return $this->email ?? $this->username;
+    }
+
+    /**
+     * Gibt ein Array der Rollen zurück, die diesem Nutzer zugeordnet sind.
+     */
+    public function getRoles(): array
+    {
+        return ['ROLE_USER'];
+    }
+
+    /**
+     * Löscht temporäre, sensible Daten.
+     */
+    public function eraseCredentials(): void
+    {
     }
 }
