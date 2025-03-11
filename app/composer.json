@@ -22,6 +22,7 @@
         "symfony/yaml": "7.2.*"
     },
     "require-dev": {
+        "phpunit/phpunit": "^10.0",
         "symfony/maker-bundle": "^1.62",
         "symfony/web-profiler-bundle": "7.2.*"
     },

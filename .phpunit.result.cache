@@ -1,0 +1,1 @@
+{"version":1,"defects":{"App\\Tests\\Controller\\ProjektControllerTest::testIndexPageIsSuccessful":8,"App\\Tests\\Controller\\ProjektControllerTest::testShowProject":8},"times":{"App\\Tests\\Controller\\ProjektControllerTest::testIndexPageIsSuccessful":0.004,"App\\Tests\\Controller\\ProjektControllerTest::testShowProject":0}}
