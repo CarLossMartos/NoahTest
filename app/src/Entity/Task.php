@@ -35,7 +35,7 @@ class Task
     private Collection $userId;
 
     #[ORM\OneToOne(inversedBy: 'task', cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Projekt $projektId = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
