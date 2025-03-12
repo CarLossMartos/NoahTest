@@ -26,7 +26,7 @@ class Task
     private ?string $status = null;
 
     #[ORM\ManyToOne(inversedBy: 'tasks')]
-    #[ORM\JoinColumn(nullable: true)]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Projekt $projekt = null;
 
     /**
@@ -82,7 +82,7 @@ class Task
         return $this;
     }
 
-    public function getStatus(): ?int
+    public function getStatus(): ?string
     {
         return $this->status;
     }
