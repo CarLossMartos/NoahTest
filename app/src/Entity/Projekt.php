@@ -13,7 +13,7 @@ class Projekt
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
     /**
@@ -28,11 +28,9 @@ class Projekt
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $description = null;
 
-    /**
-     * @var Collection<int, self>
-     */
-    #[ORM\ManyToMany(targetEntity: self::class, inversedBy: 'userId')]
-    private Collection $userId;
+    #[ORM\ManyToOne(inversedBy: 'projekts')]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: true)]
+    private ?User $user = null;
 
     #[ORM\OneToOne(mappedBy: 'projektId', cascade: ['persist', 'remove'])]
     private ?Task $task = null;
@@ -52,7 +50,6 @@ class Projekt
     public function __construct()
     {
         $this->tasks = new ArrayCollection();
-        $this->userId = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -114,26 +111,14 @@ class Projekt
         return $this;
     }
 
-    /**
-     * @return Collection<int, self>
-     */
-    public function getUserId(): Collection
+    public function getUser(): ?User
     {
-        return $this->userId;
+        return $this->user;
     }
 
-    public function addUserId(self $userId): static
+    public function setUser(?User $user): self
     {
-        if (!$this->userId->contains($userId)) {
-            $this->userId->add($userId);
-        }
-
-        return $this;
-    }
-
-    public function removeUserId(self $userId): static
-    {
-        $this->userId->removeElement($userId);
+        $this->user = $user;
 
         return $this;
     }

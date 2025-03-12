@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -24,6 +26,14 @@ class User
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $email = null;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Projekt::class)]
+    private Collection $projekts;
+
+    public function __construct()
+    {
+        $this->projekts = new ArrayCollection();
+    }
 
     // Getter und Setter
 
@@ -82,6 +92,35 @@ class User
         return $this;
     }
 
+    /**
+     * @return Collection<int, Projekt>
+     */
+    public function getProjekts(): Collection
+    {
+        return $this->projekts;
+    }
+
+    public function addProjekt(Projekt $projekt): self
+    {
+        if (!$this->projekts->contains($projekt)) {
+            $this->projekts->add($projekt);
+            $projekt->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProjekt(Projekt $projekt): self
+    {
+        if ($this->projekts->removeElement($projekt)) {
+            // set the owning side to null (unless already changed)
+            if ($projekt->getUser() === $this) {
+                $projekt->setUser(null);
+            }
+        }
+
+        return $this;
+    }
 
     /**
      * Liefert den eindeutigen Identifikator des Nutzers.
