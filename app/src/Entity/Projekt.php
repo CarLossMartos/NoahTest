@@ -19,7 +19,7 @@ class Projekt
     /**
      * @var Collection<int, Task>
      */
-    #[ORM\OneToMany(targetEntity: Task::class, mappedBy: 'projekt')]
+    #[ORM\OneToMany(targetEntity: Task::class, mappedBy: 'projekt', cascade: ['remove'])]
     private Collection $tasks;
 
     #[ORM\Column(length: 255)]

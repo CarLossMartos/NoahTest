@@ -26,7 +26,7 @@ class Task
     private ?string $status = null;
 
     #[ORM\ManyToOne(targetEntity: Projekt::class, inversedBy: 'tasks')]
-    #[ORM\JoinColumn(name: 'projekt_id', referencedColumnName: 'id', nullable: true)]
+    #[ORM\JoinColumn(name: 'projekt_id', referencedColumnName: 'id', nullable: true, onDelete: 'CASCADE')]
     private ?Projekt $projekt = null;
 
     /**
