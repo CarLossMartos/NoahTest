@@ -42,6 +42,32 @@ class TaskService
     }
 
     /**
+     * Alle Tasks abrufen
+     */
+    public function getAllTasks(): array
+    {
+        $tasks = $this->taskRepository->findAll();
+        $result = [];
+
+        foreach ($tasks as $task) {
+            $project = $task->getProjekt();
+            $result[] = [
+                'id'             => $task->getId(),
+                'title'          => $task->getTaskName(),
+                'description'    => $task->getTaskDescription(),
+                'status'         => $task->getStatus(),
+                'project_id'     => $project ? $project->getId() : null,
+                'project_name'   => $project ? $project->getName() : null,
+                'project_color'  => $project ? $project->getColor() : null,
+                'created_at'     => $task->getCreatedAt()->format('c'),
+                'updated_at'     => $task->getUpdatedAt()->format('c'),
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
      * Neuen Task erstellen
      */
     public function createTask(string $title, string $description, string $status, int $projectId): ?Task
@@ -101,5 +127,19 @@ class TaskService
         $this->entityManager->flush();
 
         return $task;
+    }
+
+    public function deleteTask(int $id): bool
+    {
+        $task = $this->taskRepository->find($id);
+
+        if (!$task) {
+            return false;
+        }
+
+        $this->entityManager->remove($task);
+        $this->entityManager->flush();
+
+        return true;
     }
 }

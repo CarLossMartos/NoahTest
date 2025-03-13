@@ -46,15 +46,15 @@ class TaskController extends AbstractController
         }
 
         return $this->json([
-            'id' => $task->getId(),
-            'title' => $task->getTaskName(),
-            'description' => $task->getTaskDescription(),
-            'status' => $task->getStatus(),
-            'project_id' => $task->getProjekt()->getId(),
-            'project_name' => $task->getProjekt()->getName(),
+            'id'            => $task->getId(),
+            'title'         => $task->getTaskName(),
+            'description'   => $task->getTaskDescription(),
+            'status'        => $task->getStatus(),
+            'project_id'    => $task->getProjekt()->getId(),
+            'project_name'  => $task->getProjekt()->getName(),
             'project_color' => $task->getProjekt()->getColor(),
-            'created_at' => $task->getCreatedAt()->format('c'),
-            'updated_at' => $task->getUpdatedAt()->format('c'),
+            'created_at'    => $task->getCreatedAt()->format('c'),
+            'updated_at'    => $task->getUpdatedAt()->format('c'),
         ], 201);
     }
 
@@ -76,15 +76,39 @@ class TaskController extends AbstractController
         }
 
         return $this->json([
-            'id' => $task->getId(),
-            'title' => $task->getTaskName(),
-            'description' => $task->getTaskDescription(),
-            'status' => $task->getStatus(),
-            'project_id' => $task->getProjekt()->getId(),
-            'project_name' => $task->getProjekt()->getName(),
+            'id'            => $task->getId(),
+            'title'         => $task->getTaskName(),
+            'description'   => $task->getTaskDescription(),
+            'status'        => $task->getStatus(),
+            'project_id'    => $task->getProjekt()->getId(),
+            'project_name'  => $task->getProjekt()->getName(),
             'project_color' => $task->getProjekt()->getColor(),
-            'created_at' => $task->getCreatedAt()->format('c'),
-            'updated_at' => $task->getUpdatedAt()->format('c'),
+            'created_at'    => $task->getCreatedAt()->format('c'),
+            'updated_at'    => $task->getUpdatedAt()->format('c'),
         ]);
     }
+
+    #[Route('/tasks', name: 'get_all_tasks', methods: ['GET'])]
+    public function getAllTasks(): JsonResponse
+    {
+        $tasks = $this->taskService->getAllTasks();
+
+        if (!$tasks) {
+            return $this->json(['error' => 'No tasks found'], 404);
+        }
+        return $this->json($tasks);
+    }
+
+    #[Route('/tasks/{id}', name: 'delete_task', methods: ['DELETE'])]
+    public function deleteTask(int $id): JsonResponse
+    {
+        $deleted = $this->taskService->deleteTask($id);
+
+        if (!$deleted) {
+            return $this->json(['error' => 'Task nicht gefunden oder Löschung fehlgeschlagen'], 404);
+        }
+
+        return $this->json(['message' => 'Task erfolgreich gelöscht'], 200);
+    }
+
 }
