@@ -11,8 +11,10 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/api', name: 'api_')]
 class ProjektController extends AbstractController
 {
+    // Injectiert den ProjektService für die Verarbeitung von Projektdaten
     public function __construct(private ProjektService $projektService) {}
 
+    // Gibt alle Projekte zurück
     #[Route('/projects', name: 'get_all_projects', methods: ['GET'])]
     public function getAllProjects(): JsonResponse
     {
@@ -34,6 +36,7 @@ class ProjektController extends AbstractController
         ]);
     }
 
+    // Holt ein Projekt anhand der ID
     #[Route('/projects/{id}', name: 'get_project_by_id', methods: ['GET'])]
     public function getProjectById(int $id): JsonResponse
     {
@@ -54,6 +57,7 @@ class ProjektController extends AbstractController
         return $this->json($data);
     }
 
+    // Erstellt ein neues Projekt
     #[Route('/projects', name: 'create_project', methods: ['POST'])]
     public function createProject(Request $request): JsonResponse
     {
@@ -74,6 +78,7 @@ class ProjektController extends AbstractController
         ], 201);
     }
 
+    // Aktualisiert ein bestehendes Projekt
     #[Route('/projects/{id}', name: 'update_project', methods: ['PUT'])]
     public function updateProject(int $id, Request $request): JsonResponse
     {
@@ -98,6 +103,7 @@ class ProjektController extends AbstractController
         ]);
     }
 
+    // Löscht ein Projekt anhand der ID
     #[Route('/projects/{id}', name: 'delete_project', methods: ['DELETE'])]
     public function deleteProject(int $id): JsonResponse
     {
